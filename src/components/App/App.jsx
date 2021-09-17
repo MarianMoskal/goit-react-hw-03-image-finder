@@ -1,0 +1,130 @@
+import { Component } from "react";
+import Searchbar from "../../components/Searchbar/Searchbar";
+import ImageGallery from "../../components/ImageGallery/ImageGallery";
+import Button from "../../components/Button/Button";
+import axios from "axios";
+import Modal from "../Modal/Modal";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Container } from "./App.styled";
+
+class App extends Component {
+  state = {
+    data: {},
+    hits: [],
+    query: "",
+    page: 1,
+    selectedImage: null,
+    loaderVisible: false,
+  };
+
+  componentDidUpdate(prevProps, prevState) {
+    const { page, data, hits, selectedImage, query } = this.state;
+
+    if (page !== prevState.page) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+
+    if (
+      hits.length === data.totalHits &&
+      selectedImage === null &&
+      query === prevState.query
+    ) {
+      setTimeout(this.notify, 3000);
+    }
+  }
+
+  handleInput = (e) => {
+    this.setState({ query: e.target.value });
+  };
+
+  fetchData = async () => {
+    const URL = `https://pixabay.com/api/?per_page=12
+    &key=22788715-8437fcb04a405122d442af916&image_type=photo&orientation=horizontal`;
+
+    await axios
+      .get(`${URL}&q=${this.state.query}&page=${this.state.page}`)
+      .then(({ data }) => {
+        this.setState((state) => ({
+          data,
+          hits: [...state.hits, ...data.hits],
+        }));
+        this.toggleLoaderVisible();
+      })
+      .catch((error) => {
+        console.log(error);
+        alert(error);
+      });
+  };
+
+  onSubmit = (e) => {
+    e.preventDefault();
+
+    this.toggleLoaderVisible();
+    e.target.textInput.value = "";
+
+    this.setState({ page: 1, hits: [] }, () => {
+      this.fetchData();
+    });
+  };
+
+  loadMore = (e) => {
+    this.toggleLoaderVisible();
+    setTimeout(
+      this.setState({ page: this.state.page + 1 }, () => {
+        this.fetchData();
+      }),
+      2000
+    );
+  };
+
+  handleSelectedImage = (src, alt) => {
+    this.setState({ selectedImage: { src, alt } });
+  };
+
+  toggleLoaderVisible = () => {
+    this.setState({ loaderVisible: !this.state.loaderVisible });
+  };
+
+  handleCloseModal = () => {
+    this.setState({ selectedImage: null });
+  };
+
+  notify = () => {
+    toast.warn("There are no more images that fit to your query", {
+      theme: "colored",
+    });
+  };
+
+  render() {
+    const { hits, loaderVisible, selectedImage, data } = this.state;
+    const rule =
+      hits.length > 11 && !loaderVisible && hits.length < data.totalHits;
+
+    return (
+      <Container>
+        <ToastContainer position="bottom-center" autoClose="off" />
+        <Searchbar onSubmit={this.onSubmit} onChange={this.handleInput} />
+        <ImageGallery
+          hits={hits}
+          visible={loaderVisible}
+          onSelect={this.handleSelectedImage}
+        />
+        {rule && <Button onClick={this.loadMore} />}
+        {selectedImage && (
+          <Modal
+            selectedImage={selectedImage}
+            closeModal={this.handleCloseModal}
+          />
+        )}
+      </Container>
+    );
+  }
+}
+
+export default App;
+
+// Your API key: 22788715-8437fcb04a405122d442af916
