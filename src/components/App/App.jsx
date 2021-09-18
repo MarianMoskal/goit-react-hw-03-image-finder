@@ -2,7 +2,7 @@ import { Component } from "react";
 import Searchbar from "../../components/Searchbar/Searchbar";
 import ImageGallery from "../../components/ImageGallery/ImageGallery";
 import Button from "../../components/Button/Button";
-import axios from "axios";
+import axiosGetData from "../../API/axiosGetData";
 import Modal from "../Modal/Modal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -42,11 +42,7 @@ class App extends Component {
   };
 
   fetchData = async () => {
-    const URL = `https://pixabay.com/api/?per_page=12
-    &key=22788715-8437fcb04a405122d442af916&image_type=photo&orientation=horizontal`;
-
-    await axios
-      .get(`${URL}&q=${this.state.query}&page=${this.state.page}`)
+    await axiosGetData(this.state.query, this.state.page)
       .then(({ data }) => {
         this.setState((state) => ({
           data,
