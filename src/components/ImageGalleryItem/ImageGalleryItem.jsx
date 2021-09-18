@@ -9,7 +9,7 @@ function ImageGalleryItem(p) {
     <Fragment>
       <Item>
         <Image
-          onClick={() => onClick(largeImageURL, alt)}
+          onClick={(e) => onClick(largeImageURL, alt)}
           src={largeImageURL}
           alt={alt}
         />

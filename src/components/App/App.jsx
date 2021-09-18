@@ -20,19 +20,21 @@ class App extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { page, data, hits, selectedImage, query } = this.state;
+    const ruleForScrollTo =
+      page !== prevState.page || selectedImage !== prevState.selectedImage;
+    const ruleForNotify =
+      hits.length === data.totalHits &&
+      selectedImage === null &&
+      query === prevState.query;
 
-    if (page !== prevState.page) {
+    if (ruleForScrollTo) {
       window.scrollTo({
         top: document.documentElement.scrollHeight,
         behavior: "smooth",
       });
     }
 
-    if (
-      hits.length === data.totalHits &&
-      selectedImage === null &&
-      query === prevState.query
-    ) {
+    if (ruleForNotify) {
       setTimeout(this.notify, 3000);
     }
   }
