@@ -2,7 +2,8 @@ import { Component } from "react";
 import Searchbar from "../../components/Searchbar/Searchbar";
 import ImageGallery from "../../components/ImageGallery/ImageGallery";
 import Button from "../../components/Button/Button";
-import axiosGetData from "../../API/axiosGetData";
+// import axios from "axios";
+import fetchData from "../../API/fetchData";
 import Modal from "../Modal/Modal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -43,21 +44,6 @@ class App extends Component {
     this.setState({ query: e.target.value });
   };
 
-  fetchData = async () => {
-    await axiosGetData(this.state.query, this.state.page)
-      .then(({ data }) => {
-        this.setState((state) => ({
-          data,
-          hits: [...state.hits, ...data.hits],
-        }));
-        this.toggleLoaderVisible();
-      })
-      .catch((error) => {
-        console.log(error);
-        alert(error);
-      });
-  };
-
   onSubmit = (e) => {
     e.preventDefault();
 
@@ -65,7 +51,7 @@ class App extends Component {
     e.target.textInput.value = "";
 
     this.setState({ page: 1, hits: [] }, () => {
-      this.fetchData();
+      this.handleFetchResponse();
     });
   };
 
@@ -73,10 +59,26 @@ class App extends Component {
     this.toggleLoaderVisible();
     setTimeout(
       this.setState({ page: this.state.page + 1 }, () => {
-        this.fetchData();
+        this.handleFetchResponse();
       }),
       2000
     );
+  };
+
+  handleFetchResponse = () => {
+    try {
+      fetchData(this.state).then(({ data }) => {
+        // console.log(data);
+        this.setState((state) => ({
+          data,
+          hits: [...state.hits, ...data.hits],
+        }));
+        this.toggleLoaderVisible();
+      });
+    } catch (error) {
+      console.log(error);
+      alert(error);
+    }
   };
 
   handleSelectedImage = (src, alt) => {

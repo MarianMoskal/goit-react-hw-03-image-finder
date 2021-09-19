@@ -30,7 +30,7 @@ function ImageGallery(p) {
             color="Orange"
             height={100}
             width={100}
-            timeout={3000}
+            timeout={7000}
           />
         </Spinner>
       )}
